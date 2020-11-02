@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WarehouseDataListener extends AnalysisEventListener<WarehouseExcelModel> {
 
-    private List<WarehouseExcelModel> list = new ArrayList<>(8);
+    private List<WarehouseExcelModel> fail = new ArrayList<>(8);
 
     private String token;
 
@@ -31,11 +31,18 @@ public class WarehouseDataListener extends AnalysisEventListener<WarehouseExcelM
     @Override
     public void invoke(WarehouseExcelModel data, AnalysisContext context) {
         log.info(data.toString());
-        list.add(data);
+        fail.add(data);
+    }
+
+    private void buildWarehouseList() {
+
     }
 
     @Override
     public void doAfterAllAnalysed(AnalysisContext context) {
-        log.info("list的列表{}", list);
+        //拼接创建仓库所需要的数据
+        //查询当前仓库编码是否存在
+        //拼接创建库位所需要的数据
+        log.info("创建失败的数据列表{}", fail);
     }
 }

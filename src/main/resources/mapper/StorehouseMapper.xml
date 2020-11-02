@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.ollgei.tool.importing.dao.mapper.StorehouseMapper">
+  <resultMap id="BaseResultMap" type="com.github.ollgei.tool.importing.dao.entity.StorehouseEntity">
+    <!--@mbg.generated-->
+    <!--@Table tb_storehouse-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="json" jdbcType="VARCHAR" property="json" />
+    <result column="created" jdbcType="VARCHAR" property="created" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, `name`, code, json, created
+  </sql>
+</mapper>
