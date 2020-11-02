@@ -1,0 +1,13 @@
+ollgei:
+  tool:
+    importing:
+      province-url: http://dc-basics-api.lunz.cn/api/v1/districts/top
+      city-url: http://dc-basics-api.lunz.cn/api/v1/districts/code
+      ucm:
+        url: https://ucm-gateway.lunz.cn/api/v1/
+        dept-id: f6b79db0-9bc1-4f46-8bea-da1e32266409
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/db_warehouse?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456

@@ -1,2 +1,6 @@
-# tool-importing-server
+### tool-importing-server
 excel导入数据
+### 技术点
+#### 中瑞车务通批量导入仓库
+* 缓存省市区数据
+* 同一市的多个仓库 要顺序生成仓库和库位

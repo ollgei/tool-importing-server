@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.ollgei.tool.importing.dao.mapper.EmployeeMapper">
+  <resultMap id="BaseResultMap" type="com.github.ollgei.tool.importing.dao.entity.EmployeeEntity">
+    <!--@mbg.generated-->
+    <!--@Table tb_employee-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="login_name" jdbcType="VARCHAR" property="loginName" />
+    <result column="sid" jdbcType="VARCHAR" property="sid" />
+    <result column="zh_name" jdbcType="VARCHAR" property="zhName" />
+    <result column="dept_id" jdbcType="VARCHAR" property="deptId" />
+    <result column="dept_name" jdbcType="VARCHAR" property="deptName" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, login_name, sid, zh_name, dept_id, dept_name
+  </sql>
+</mapper>

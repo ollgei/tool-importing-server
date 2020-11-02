@@ -1,0 +1,6 @@
+ollgei:
+  tool:
+    importing:
+      ucm:
+        url: https://ucm-gateway.lunz.cn/api/v1/
+        dept-id: f6b79db0-9bc1-4f46-8bea-da1e32266409
