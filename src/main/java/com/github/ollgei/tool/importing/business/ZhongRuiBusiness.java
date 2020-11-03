@@ -45,6 +45,10 @@ public class ZhongRuiBusiness {
         warehouseBusiness.save(code, models);
     }
 
+    public void createWarehouse(String token) {
+        warehouseBusiness.create(token);
+    }
+
     @Autowired
     public void setEmployeeBusiness(ZhongRuiEmployeeBusiness employeeBusiness) {
         this.employeeBusiness = employeeBusiness;

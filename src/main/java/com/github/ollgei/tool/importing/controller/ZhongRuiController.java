@@ -42,6 +42,12 @@ public class ZhongRuiController {
         return ApiHelper.builder().build().success();
     }
 
+    @GetMapping("/create/warehouse")
+    public BearResponse createWarehouse(@RequestParam("token") String token) {
+        zhongRuiBusiness.createWarehouse(token);
+        return ApiHelper.builder().build().success();
+    }
+
     @GetMapping("/init/employee")
     public BearResponse initEmployee(@RequestParam("token") String token) {
         zhongRuiBusiness.initEmployee(token);

@@ -1,6 +1,7 @@
 package com.github.ollgei.tool.importing.business.zhongrui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,14 +14,23 @@ import org.springframework.util.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.ollgei.base.commonj.gson.Gson;
 import com.github.ollgei.base.commonj.gson.GsonBuilder;
+import com.github.ollgei.base.commonj.gson.JsonElement;
+import com.github.ollgei.base.commonj.gson.JsonParser;
+import com.github.ollgei.boot.autoconfigure.httpclient.FeignClientManager;
 import com.github.ollgei.tool.importing.business.ZhongRuiWarehouseBusiness;
 import com.github.ollgei.tool.importing.common.model.WarehouseModel;
+import com.github.ollgei.tool.importing.configuration.ToolImportingProperties;
 import com.github.ollgei.tool.importing.dao.entity.EmployeeEntity;
 import com.github.ollgei.tool.importing.dao.entity.StorehouseEntity;
 import com.github.ollgei.tool.importing.dao.service.EmployeeService;
 import com.github.ollgei.tool.importing.dao.service.StorehouseService;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * desc.
+ * @author zjw
+ * @since 1.0
+ */
 @Service
 @Slf4j
 public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness, InitializingBean {
@@ -33,15 +43,54 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
 
     private Gson gson = new GsonBuilder().create();
 
+    private FeignClientManager clientManager;
+
+    private ToolImportingProperties properties;
+
+    public ZhongRuiWarehouseBusinessImpl(ToolImportingProperties properties) {
+        this.properties = properties;
+    }
+
+    @Override
+    public void create(String token) {
+        final List<StorehouseEntity> list = storehouseService.list(
+                Wrappers.<StorehouseEntity>query().
+                        eq(StorehouseEntity.COL_CREATED, "2")
+                        //.eq(StorehouseEntity.COL_CODE, "361000020001")
+                );
+        int i = 0;
+        final List<StorehouseEntity> fails = new ArrayList<>();
+        for (StorehouseEntity entity : list) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("token", token);
+            final JsonElement request = JsonParser.parseString(entity.getJson());
+            log.info("创建仓库请求的数据:" + request.toString());
+            final JsonElement response = clientManager.postForJson(properties.getFdUrl() + "/warehouse-controller/save-one-warehouse-area", headers, request);
+            if (!response.getAsJsonObject().getAsJsonPrimitive("success").getAsBoolean()) {
+                fails.add(entity);
+                continue;
+            }
+            log.info("创建仓库返回的数据:" + response.toString());
+            StorehouseEntity entity1 = new StorehouseEntity();
+            entity1.setId(entity.getId());
+            entity1.setCreated("1");
+            storehouseService.updateById(entity1);
+            i++;
+        }
+        log.info("成功导入:{}条", i);
+        log.info("失败的数据", fails);
+    }
+
     @Override
     public void save(String code, List<WarehouseModel> models) {
         int i = caches.containsKey(code) ? caches.get(code).size() : 0;
         for (WarehouseModel model : models) {
-            final WarehouseRequest request = buildWarehouseRequest(model, i + 1);
+            String newCode = String.format("%s%04d", model.getCode(), i + 1);
+            final WarehouseRequest request = buildWarehouseRequest(model, newCode);
 
             StorehouseEntity entity = new StorehouseEntity();
+            entity.setCode(newCode);
             entity.setName(model.getName());
-            entity.setCode(model.getCode());
             if (request == null) {
                 entity.setJson(gson.toJson(model));
                 entity.setCreated("3");
@@ -55,13 +104,13 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
         }
     }
 
-    private WarehouseRequest buildWarehouseRequest(WarehouseModel model, int index) {
+    private WarehouseRequest buildWarehouseRequest(WarehouseModel model, String code) {
         WarehouseRequest request = new WarehouseRequest();
         request.setAddress(model.getAddr());
         request.setCityCode(model.getCityCode());
         request.setCityName(model.getCityName());
-        request.setCode(String.format("%s%04d", model.getCode(), index));
-        request.setCreatedById("1");
+        request.setCode(code);
+        request.setCreatedById("0");
         request.setName(model.getName());
         request.setParentId("");
         request.setProvinceCode(model.getProviceCode());
@@ -131,6 +180,11 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
     @Autowired
     public void setEmployeeService(EmployeeService employeeService) {
         this.employeeService = employeeService;
+    }
+
+    @Autowired
+    public void setClientManager(FeignClientManager clientManager) {
+        this.clientManager = clientManager;
     }
 
     @Override

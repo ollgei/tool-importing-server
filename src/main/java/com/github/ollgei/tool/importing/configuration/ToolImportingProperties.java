@@ -17,6 +17,7 @@ public class ToolImportingProperties {
 
     private String provinceUrl;
     private String cityUrl;
+    private String fdUrl;
 
     @Data
     public static class UserCenter {
