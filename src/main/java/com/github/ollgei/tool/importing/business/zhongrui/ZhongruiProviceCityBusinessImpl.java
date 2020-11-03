@@ -103,7 +103,7 @@ public class ZhongruiProviceCityBusinessImpl implements ZhongruiProviceCityBusin
     public String fetchCityCode(String accessToken, String provinceCode, String name) {
         fetchCities(accessToken, provinceCode);
         final JsonArray array = cacheCity.get(provinceCode).getAsJsonArray();
-        final String found = walkCity(array, name);
+        final String found = walkCity(array, mapName(name));
         if (StringUtils.hasText(found)) {
             return found;
         }
@@ -126,7 +126,50 @@ public class ZhongruiProviceCityBusinessImpl implements ZhongruiProviceCityBusin
     private String mapName(String name) {
         if (name.equals("阿拉善左旗")) {
             return "阿拉善盟";
+        } else if (name.equals("重庆市")) {
+            return "重庆市市辖区";
+        } else if (name.equals("北京市")) {
+            return "北京市市辖区";
+        } else if (name.equals("上海市")) {
+            return "上海市市辖区";
+        } else if (name.equals("天津市")) {
+            return "天津市市辖区";
+        } else if (name.equals("恩施市")) {
+            return "恩施土家族苗族自治州";
+        } else if (name.equals("济源市")) {
+            return "河南省省直辖";
+        } else if (name.equals("潜江市") || name.equals("天门市")) {
+            return "湖北省省直辖";
+        } else if (name.equals("莱芜区")) {
+            return "莱芜市";
+        } else if (name.equals("湘乡市")) {
+            return "湘潭市";
+        } else if (name.equals("景洪市")) {
+            return "西双版纳傣族自治州";
+        } else if (name.equals("阆中市")) {
+            return "南充市";
+        } else if (name.equals("文山市")) {
+            return "文山壮族苗族自治州";
+        } else if (name.equals("凯里市")) {
+            return "黔东南苗族侗族自治州";
+        } else if (name.equals("兴义市")) {
+            return "黔西南布依族苗族自治州";
+        } else if (name.equals("忠县")) {
+            return "重庆市县";
+        } else if (name.equals("大理市")) {
+            return "大理白族自治州";
+        } else if (name.equals("楚雄市")) {
+            return "楚雄彝族自治州";
+        } else if (name.equals("滕州市")) {
+            return "枣庄市";
+        } else if (name.equals("富锦市")) {
+            return "佳木斯市";
+        } else if (name.equals("公主岭市")) {
+            return "长春市";
+        } else if (name.equals("都匀市")) {
+            return "黔南布依族苗族自治州";
         }
+
         return name;
     }
 

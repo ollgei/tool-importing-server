@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.excel.EasyExcel;
 import com.github.ollgei.base.commonj.api.ApiHelper;
 import com.github.ollgei.base.commonj.api.BearResponse;
+import com.github.ollgei.base.commonj.utils.SpringHelper;
 import com.github.ollgei.tool.importing.business.ZhongRuiBusiness;
 import com.github.ollgei.tool.importing.business.listener.WarehouseDataListener;
 import com.github.ollgei.tool.importing.common.model.WarehouseExcelModel;
+import com.github.ollgei.tool.importing.common.model.WarehouseModel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -35,8 +37,8 @@ public class ZhongRuiController {
 
     @Operation(description = "批量导入仓库")
     @GetMapping("/chewu/warehouse/batch")
-    public BearResponse chewuWarehouseBatch(@RequestParam("filePath") String filePath, @RequestParam("token") String token) {
-        EasyExcel.read(filePath, WarehouseExcelModel.class, new WarehouseDataListener(token, zhongRuiBusiness)).sheet().doRead();
+    public BearResponse chewuWarehouseBatch(@RequestParam("filePath") String filePath, @RequestHeader("accessToken") String accessToken) {
+        EasyExcel.read(filePath, WarehouseExcelModel.class, new WarehouseDataListener(accessToken, zhongRuiBusiness)).sheet().doRead();
         return ApiHelper.builder().build().success();
     }
 
@@ -68,6 +70,14 @@ public class ZhongRuiController {
         return zhongRuiBusiness.fetchCityCode(token, code, name);
     }
 
+    public static void main(String[] args) {
+        for (int i = 0; i < 10; i++) {
+            WarehouseExcelModel model = new WarehouseExcelModel();
+            model.setCityName("123445");
+            WarehouseModel model1 = SpringHelper.copyObject0(model, new WarehouseModel());
+            System.out.println(model1);
+        }
+    }
 
 
 }

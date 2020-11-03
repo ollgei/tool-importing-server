@@ -1,7 +1,11 @@
 package com.github.ollgei.tool.importing.business;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.github.ollgei.tool.importing.common.model.WarehouseModel;
 
 /**
  * desc.
@@ -14,6 +18,8 @@ public class ZhongRuiBusiness {
     private ZhongRuiEmployeeBusiness employeeBusiness;
 
     private ZhongruiProviceCityBusiness proviceCityBusiness;
+
+    private ZhongRuiWarehouseBusiness warehouseBusiness;
 
     public void initEmployee(String token) {
         employeeBusiness.init(token);
@@ -35,6 +41,10 @@ public class ZhongRuiBusiness {
         return proviceCityBusiness.fetchCityCode(accessToken, provinceCode, name);
     }
 
+    public void saveWarehouse(String code, List<WarehouseModel> models) {
+        warehouseBusiness.save(code, models);
+    }
+
     @Autowired
     public void setEmployeeBusiness(ZhongRuiEmployeeBusiness employeeBusiness) {
         this.employeeBusiness = employeeBusiness;
@@ -43,5 +53,10 @@ public class ZhongRuiBusiness {
     @Autowired
     public void setProviceCityBusiness(ZhongruiProviceCityBusiness proviceCityBusiness) {
         this.proviceCityBusiness = proviceCityBusiness;
+    }
+
+    @Autowired
+    public void setWarehouseBusiness(ZhongRuiWarehouseBusiness warehouseBusiness) {
+        this.warehouseBusiness = warehouseBusiness;
     }
 }

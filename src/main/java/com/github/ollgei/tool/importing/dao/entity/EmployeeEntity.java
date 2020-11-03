@@ -7,10 +7,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 @TableName(value = "tb_employee")
 public class EmployeeEntity {
-    public static final String COL_LOGINNAME = "loginName";
-    public static final String COL_ZHNAME = "zhName";
-    public static final String COL_DEPTID = "deptId";
-    public static final String COL_DEPTNAME = "deptName";
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
