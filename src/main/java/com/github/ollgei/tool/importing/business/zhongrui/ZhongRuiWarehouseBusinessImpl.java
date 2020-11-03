@@ -14,7 +14,9 @@ import org.springframework.util.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.ollgei.base.commonj.gson.Gson;
 import com.github.ollgei.base.commonj.gson.GsonBuilder;
+import com.github.ollgei.base.commonj.gson.JsonArray;
 import com.github.ollgei.base.commonj.gson.JsonElement;
+import com.github.ollgei.base.commonj.gson.JsonObject;
 import com.github.ollgei.base.commonj.gson.JsonParser;
 import com.github.ollgei.boot.autoconfigure.httpclient.FeignClientManager;
 import com.github.ollgei.tool.importing.business.ZhongRuiWarehouseBusiness;
@@ -28,6 +30,12 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * desc.
+ *  1 已经创建好仓库和库位
+ *  3 有问题数据
+ *  2 准备数据没有问题
+ *  创建仓库 (2 -> 6)
+ *  更新仓库ID(6 -> 4)
+ *  创建库位(4 -> 5)
  * @author zjw
  * @since 1.0
  */
@@ -56,7 +64,7 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
         final List<StorehouseEntity> list = storehouseService.list(
                 Wrappers.<StorehouseEntity>query().
                         eq(StorehouseEntity.COL_CREATED, "2")
-                        //.eq(StorehouseEntity.COL_CODE, "361000020001")
+//                        .eq(StorehouseEntity.COL_CODE, "361000020001")
                 );
         int i = 0;
         final List<StorehouseEntity> fails = new ArrayList<>();
@@ -73,12 +81,129 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
             log.info("创建仓库返回的数据:" + response.toString());
             StorehouseEntity entity1 = new StorehouseEntity();
             entity1.setId(entity.getId());
-            entity1.setCreated("1");
+            entity1.setCreated("6");
             storehouseService.updateById(entity1);
             i++;
         }
         log.info("成功导入:{}条", i);
         log.info("失败的数据", fails);
+    }
+
+    @Override
+    public void createStorespace(String token) {
+        final List<StorehouseEntity> list = storehouseService.list(
+                Wrappers.<StorehouseEntity>query().
+                        eq(StorehouseEntity.COL_CREATED, "4")
+//                .eq(StorehouseEntity.COL_CODE, "361000020001")
+        );
+        int i = 0;
+        final List<StorehouseEntity> fails = new ArrayList<>();
+        Map<String, String> headers = new HashMap<>();
+        headers.put("token", token);
+        for (StorehouseEntity entity : list) {
+            //{"name":"测试","code":"K1234567qwer","createdById":"dacg","warehouseCode":"12345678qwer",
+            //"warehouseId":"CZWI0000000035"}
+            String code = entity.getCode();
+            JsonObject request = new JsonObject();
+            request.addProperty("name", entity.getName());
+            request.addProperty("createdById", "0");
+            request.addProperty("code", "K" + code.substring(0, 6) + "0" +
+                    code.substring(code.length() - 4));
+            request.addProperty("warehouseCode", entity.getCode());
+            request.addProperty("warehouseId", entity.getWarehouseId());
+
+            log.info("创建库位请求的数据:" + request.toString());
+            final JsonElement response = clientManager.postForJson(properties.getFdUrl() + "/storespace-controller/save", headers, request);
+            if (!response.getAsJsonObject().getAsJsonPrimitive("success").getAsBoolean()) {
+                fails.add(entity);
+                continue;
+            }
+            log.info("创建库位返回的数据:" + response.toString());
+            StorehouseEntity entity1 = new StorehouseEntity();
+            entity1.setId(entity.getId());
+            entity1.setCreated("5");
+            storehouseService.updateById(entity1);
+            i++;
+
+        }
+        log.info("成功导入:{}条", i);
+        log.info("失败的数据：{}", fails);
+    }
+
+    @Override
+    public void updateId(String token) {
+        final List<StorehouseEntity> list = storehouseService.list(
+                Wrappers.<StorehouseEntity>query().
+                        eq(StorehouseEntity.COL_CREATED, "6")
+//                .eq(StorehouseEntity.COL_CODE, "361000020001")
+        );
+        int i = 0;
+        final List<StorehouseEntity> fails = new ArrayList<>();
+        Map<String, String> headers = new HashMap<>();
+        headers.put("token", token);
+        for (StorehouseEntity entity : list) {
+            if (StringUtils.hasText(entity.getCode()) && StringUtils.hasText(entity.getName())) {
+                JsonElement request = buildQuery(entity.getCode());
+                log.info("查询仓库请求的数据:" + request.toString());
+                final JsonElement response = clientManager.postForJson(properties.getFdUrl() + "/warehouse-controller/warehouses/page", headers, request);
+                if (!response.getAsJsonObject().getAsJsonPrimitive("success").getAsBoolean()) {
+                    fails.add(entity);
+                    continue;
+                }
+                log.info("查询仓库返回的数据:" + response.toString());
+                //{"status":0,"data":{"total":1,"pageIndex":1,"records":[{"id":"CZWI0000000760","code":"230000010001","name":"黑龙江一级仓","provinceName":"黑龙江省","address":"黑龙江省哈尔滨市道里区群力第六大道与朗江路交口恒祥空间10栋1单元2402","stockNums":0,"adminName":"孟祥福"}],"pageSize":10},"success":true}
+                StorehouseEntity entity1 = new StorehouseEntity();
+                entity1.setId(entity.getId());
+                entity1.setCreated("4");
+                entity1.setWarehouseId(response.getAsJsonObject().
+                        getAsJsonObject("data").
+                        getAsJsonArray("records").
+                        get(0).getAsJsonObject().
+                        getAsJsonPrimitive("id").getAsString()
+                );
+                storehouseService.updateById(entity1);
+                i++;
+            } else {
+                log.warn("Code为空");
+            }
+        }
+        log.info("成功导入:{}条", i);
+        log.info("失败的数据：{}", fails);
+    }
+
+    private JsonElement buildQuery(String code) {
+//        {"pageSize":10,"pageIndex":1,"sort":[],
+//            "filters":[{"field":"code","op":"cn","term":"eqeqe"}],
+//            "filter":{"op":"and","groups":[],
+//            "rules":[{"field":"code","op":"cn","data":"eqeqe"},{"field":"name","op":"cn","data":""},
+//            {"field":"pro","op":"cn","data":""},{"field":"city","op":"cn","data":""}]}}
+        JsonObject object = new JsonObject();
+        object.addProperty("pageSize", 10);
+        object.addProperty("pageIndex", 1);
+        object.add("sort", new JsonArray());
+
+        JsonArray filters = new JsonArray();
+        final JsonObject filtersEle = new JsonObject();
+        filtersEle.addProperty("field", "code");
+        filtersEle.addProperty("op", "cn");
+        filtersEle.addProperty("term", code);
+        filters.add(filtersEle);
+        object.add("filters", filters);
+
+        final JsonObject filter = new JsonObject();
+        filter.addProperty("op", "and");
+        filter.add("groups", new JsonArray());
+
+        JsonArray rules = new JsonArray();
+        final JsonObject filterEle = new JsonObject();
+        filterEle.addProperty("field", "code");
+        filterEle.addProperty("op", "cn");
+        filterEle.addProperty("data", code);
+        rules.add(filterEle);
+        filter.add("rules", rules);
+
+        object.add("filter", filter);
+        return object;
     }
 
     @Override
@@ -190,5 +315,48 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
     @Override
     public void afterPropertiesSet()  {
         initWarehouse();
+    }
+
+    public static void main(String[] args) {
+        String code = "12321";
+        JsonObject object = new JsonObject();
+        object.addProperty("pageSize", 10);
+        object.addProperty("pageIndex", 1);
+        object.add("sort", new JsonArray());
+
+        JsonArray filters = new JsonArray();
+        final JsonObject filtersEle = new JsonObject();
+        filtersEle.addProperty("field", "code");
+        filtersEle.addProperty("op", "cn");
+        filtersEle.addProperty("term", code);
+        filters.add(filtersEle);
+        object.add("filters", filters);
+
+        final JsonObject filter = new JsonObject();
+        filter.addProperty("op", "and");
+        filter.add("groups", new JsonArray());
+
+        JsonArray rules = new JsonArray();
+        final JsonObject filterEle = new JsonObject();
+        filterEle.addProperty("field", "code");
+        filterEle.addProperty("op", "cn");
+        filterEle.addProperty("data", code);
+        rules.add(filterEle);
+        filter.add("rules", rules);
+
+        object.add("filter", filter);
+        System.out.println(object);
+
+//        String s = "{\"status\":0,\"data\":{\"total\":1,\"pageIndex\":1,\"records\":[{\"id\":\"CZWI0000000760\",\"code\":\"230000010001\",\"name\":\"黑龙江一级仓\",\"provinceName\":\"黑龙江省\",\"address\":\"黑龙江省哈尔滨市道里区群力第六大道与朗江路交口恒祥空间10栋1单元2402\",\"stockNums\":0,\"adminName\":\"孟祥福\"}],\"pageSize\":10},\"success\":true}";
+//
+//        JsonElement response = JsonParser.parseString(s);
+//        System.out.println(response.getAsJsonObject().
+//                getAsJsonObject("data").
+//                getAsJsonArray("records").
+//                get(0).getAsJsonObject().
+//                getAsJsonPrimitive("id").getAsString());
+        code = "152500020002";
+        System.out.println("K" + code.substring(0, 6) + "0" +
+                code.substring(code.length() - 4));
     }
 }

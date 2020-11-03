@@ -49,6 +49,14 @@ public class ZhongRuiBusiness {
         warehouseBusiness.create(token);
     }
 
+    public void updateWarehouseId(String token) {
+        warehouseBusiness.updateId(token);
+    }
+
+    public void createStorespace(String token) {
+        warehouseBusiness.createStorespace(token);
+    }
+
     @Autowired
     public void setEmployeeBusiness(ZhongRuiEmployeeBusiness employeeBusiness) {
         this.employeeBusiness = employeeBusiness;

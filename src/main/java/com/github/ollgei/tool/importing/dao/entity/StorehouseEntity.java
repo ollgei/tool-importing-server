@@ -16,6 +16,9 @@ public class StorehouseEntity {
     @TableField(value = "code")
     private String code;
 
+    @TableField(value = "warehouse_id")
+    private String warehouseId;
+
     @TableField(value = "json")
     private String json;
 
@@ -30,6 +33,8 @@ public class StorehouseEntity {
     public static final String COL_NAME = "name";
 
     public static final String COL_CODE = "code";
+
+    public static final String COL_WAREHOUSE_ID = "warehouse_id";
 
     public static final String COL_JSON = "json";
 
@@ -75,6 +80,20 @@ public class StorehouseEntity {
      */
     public void setCode(String code) {
         this.code = code;
+    }
+
+    /**
+     * @return warehouse_id
+     */
+    public String getWarehouseId() {
+        return warehouseId;
+    }
+
+    /**
+     * @param warehouseId
+     */
+    public void setWarehouseId(String warehouseId) {
+        this.warehouseId = warehouseId;
     }
 
     /**

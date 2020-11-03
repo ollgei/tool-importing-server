@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
 
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
+import com.github.ollgei.base.commonj.utils.CglibBeanMapHelper;
 import com.github.ollgei.tool.importing.business.ZhongRuiBusiness;
 import com.github.ollgei.tool.importing.common.model.WarehouseExcelModel;
 import com.github.ollgei.tool.importing.common.model.WarehouseModel;
@@ -52,8 +52,8 @@ public class WarehouseDataListener extends AnalysisEventListener<WarehouseExcelM
     }
 
     private WarehouseModel buildWarehouseModel(WarehouseExcelModel data) {
-        final WarehouseModel model = new WarehouseModel();
-        BeanUtils.copyProperties(data, model);
+        final WarehouseModel model =
+                CglibBeanMapHelper.of().copyObject0(data, new WarehouseModel(), new WarehouseModel());
         final String provinceCode =
                 zhongRuiBusiness.fetchProvinceCode(accessToken, data.getProviceName());
         model.setProviceCode(provinceCode);
