@@ -74,11 +74,11 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
             final JsonElement request = JsonParser.parseString(entity.getJson());
             log.info("创建仓库请求的数据:" + request.toString());
             final JsonElement response = clientManager.postForJson(properties.getFdUrl() + "/warehouse-controller/save-one-warehouse-area", headers, request);
+            log.info("创建仓库返回的数据:" + response.toString());
             if (!response.getAsJsonObject().getAsJsonPrimitive("success").getAsBoolean()) {
                 fails.add(entity);
                 continue;
             }
-            log.info("创建仓库返回的数据:" + response.toString());
             StorehouseEntity entity1 = new StorehouseEntity();
             entity1.setId(entity.getId());
             entity1.setCreated("6");
@@ -114,11 +114,11 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
 
             log.info("创建库位请求的数据:" + request.toString());
             final JsonElement response = clientManager.postForJson(properties.getFdUrl() + "/storespace-controller/save", headers, request);
+            log.info("创建库位返回的数据:" + response.toString());
             if (!response.getAsJsonObject().getAsJsonPrimitive("success").getAsBoolean()) {
                 fails.add(entity);
                 continue;
             }
-            log.info("创建库位返回的数据:" + response.toString());
             StorehouseEntity entity1 = new StorehouseEntity();
             entity1.setId(entity.getId());
             entity1.setCreated("5");
@@ -146,11 +146,11 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
                 JsonElement request = buildQuery(entity.getCode());
                 log.info("查询仓库请求的数据:" + request.toString());
                 final JsonElement response = clientManager.postForJson(properties.getFdUrl() + "/warehouse-controller/warehouses/page", headers, request);
+                log.info("查询仓库返回的数据:" + response.toString());
                 if (!response.getAsJsonObject().getAsJsonPrimitive("success").getAsBoolean()) {
                     fails.add(entity);
                     continue;
                 }
-                log.info("查询仓库返回的数据:" + response.toString());
                 //{"status":0,"data":{"total":1,"pageIndex":1,"records":[{"id":"CZWI0000000760","code":"230000010001","name":"黑龙江一级仓","provinceName":"黑龙江省","address":"黑龙江省哈尔滨市道里区群力第六大道与朗江路交口恒祥空间10栋1单元2402","stockNums":0,"adminName":"孟祥福"}],"pageSize":10},"success":true}
                 StorehouseEntity entity1 = new StorehouseEntity();
                 entity1.setId(entity.getId());
@@ -229,6 +229,31 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
         }
     }
 
+    @Override
+    public void updateFail() {
+        final List<StorehouseEntity> list = storehouseService.list(
+                Wrappers.<StorehouseEntity>query().
+                        eq(StorehouseEntity.COL_CREATED, "3")
+        );
+        list.forEach(s -> {
+            WarehouseModel model = gson.fromJson(s.getJson(), WarehouseModel.class);
+            final WarehouseRequest request = buildWarehouseRequest(model, s.getCode());
+
+            StorehouseEntity entity = new StorehouseEntity();
+            entity.setId(s.getId());
+            entity.setCode(s.getCode());
+            entity.setName(model.getName());
+            if (request == null) {
+                return;
+            } else {
+                entity.setJson(gson.toJson(request));
+                entity.setCreated("2");
+            }
+
+            storehouseService.updateById(entity);
+        });
+    }
+
     private WarehouseRequest buildWarehouseRequest(WarehouseModel model, String code) {
         WarehouseRequest request = new WarehouseRequest();
         request.setAddress(model.getAddr());
@@ -272,6 +297,7 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
         employee.setLoginName(entity.getLoginName());
         employee.setName(entity.getZhName());
         employee.setIsAdmin(isAdmin);
+        employee.setIfOwner(isAdmin);
         return employee;
     }
 

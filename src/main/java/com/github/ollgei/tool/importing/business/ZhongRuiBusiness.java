@@ -53,6 +53,10 @@ public class ZhongRuiBusiness {
         warehouseBusiness.updateId(token);
     }
 
+    public void updateFail() {
+        warehouseBusiness.updateFail();
+    }
+
     public void createStorespace(String token) {
         warehouseBusiness.createStorespace(token);
     }

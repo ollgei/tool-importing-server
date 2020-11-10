@@ -10,11 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.excel.EasyExcel;
 import com.github.ollgei.base.commonj.api.ApiHelper;
 import com.github.ollgei.base.commonj.api.BearResponse;
-import com.github.ollgei.base.commonj.utils.SpringHelper;
 import com.github.ollgei.tool.importing.business.ZhongRuiBusiness;
 import com.github.ollgei.tool.importing.business.listener.WarehouseDataListener;
 import com.github.ollgei.tool.importing.common.model.WarehouseExcelModel;
-import com.github.ollgei.tool.importing.common.model.WarehouseModel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -45,6 +43,12 @@ public class ZhongRuiController {
     @GetMapping("/create/warehouse")
     public BearResponse createWarehouse(@RequestParam("token") String token) {
         zhongRuiBusiness.createWarehouse(token);
+        return ApiHelper.builder().build().success();
+    }
+
+    @GetMapping("/update/warehouse/fail")
+    public BearResponse updateWarehousenNormal() {
+        zhongRuiBusiness.updateFail();
         return ApiHelper.builder().build().success();
     }
 
@@ -87,15 +91,5 @@ public class ZhongRuiController {
     public String fetchCity(@RequestHeader("token") String token, @RequestParam("code") String code, @RequestParam("name") String name) {
         return zhongRuiBusiness.fetchCityCode(token, code, name);
     }
-
-    public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) {
-            WarehouseExcelModel model = new WarehouseExcelModel();
-            model.setCityName("123445");
-            WarehouseModel model1 = SpringHelper.copyObject0(model, new WarehouseModel());
-            System.out.println(model1);
-        }
-    }
-
 
 }

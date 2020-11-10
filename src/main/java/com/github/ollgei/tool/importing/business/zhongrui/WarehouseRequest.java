@@ -38,6 +38,7 @@ final class WarehouseRequest {
         private String name;
         private String loginName;
         private Boolean isAdmin;
+        private boolean ifOwner;
     }
 
 }

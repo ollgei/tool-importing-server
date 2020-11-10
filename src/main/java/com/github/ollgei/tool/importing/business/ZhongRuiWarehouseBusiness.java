@@ -9,4 +9,5 @@ public interface ZhongRuiWarehouseBusiness {
     void createStorespace(String token);
     void updateId(String token);
     void save(String code, List<WarehouseModel> models);
+    void updateFail();
 }
