@@ -254,6 +254,38 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
         });
     }
 
+    @Override
+    public void remove(String token) {
+
+        final List<StorehouseEntity> list = storehouseService.list(
+                Wrappers.<StorehouseEntity>query().
+                        eq(StorehouseEntity.COL_CREATED, "5")
+        );
+        final List<StorehouseEntity> fails = new ArrayList<>();
+
+        int i = 0;
+        Map<String, String> headers = new HashMap<>();
+        headers.put("token", token);
+        for (StorehouseEntity s : list) {
+            final String url = "http://fd-prod.lunz.cn:7400/v1/api/warehouse-controller/remove-warehouse-are?deletedById=0&ids=" + s.getWarehouseId();
+            log.info("删除仓库请求的数据:" + url);
+            final JsonElement response = clientManager.getForJson(url, headers);
+            log.info("删除仓库返回的数据:" + response.toString());
+            if (!response.getAsJsonObject().getAsJsonPrimitive("success").getAsBoolean()) {
+                fails.add(s);
+                continue;
+            }
+            StorehouseEntity entity1 = new StorehouseEntity();
+            entity1.setId(s.getId());
+            entity1.setCreated("99");
+            storehouseService.updateById(entity1);
+            i++;
+        }
+
+        log.info("成功删除:{}条", i);
+        log.info("失败的数据：{}", fails);
+    }
+
     private WarehouseRequest buildWarehouseRequest(WarehouseModel model, String code) {
         WarehouseRequest request = new WarehouseRequest();
         request.setAddress(model.getAddr());
@@ -266,24 +298,32 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
         request.setProvinceCode(model.getProviceCode());
         request.setProvinceName(model.getProviceName());
 
+        final String adminNo = model.getAdminNo().trim().toUpperCase();
         final EmployeeEntity adminEntity = employeeService.getOne(Wrappers.<EmployeeEntity>query().
-                eq(EmployeeEntity.COL_LOGIN_NAME, model.getAdminNo().trim().toUpperCase()));
+                eq(EmployeeEntity.COL_LOGIN_NAME, adminNo));
         if (adminEntity == null) {
             return null;
         }
         List<WarehouseRequest.Employee> employees = new ArrayList<>();
 
         final WarehouseRequest.Employee adminEmployee = buildWarehouseEmployee(adminEntity, true);
-        employees.add(adminEmployee);
 
         if (StringUtils.hasText(model.getEmployeeNo())) {
-            final EmployeeEntity employeeEntity = employeeService.getOne(Wrappers.<EmployeeEntity>query().
-                    eq(EmployeeEntity.COL_LOGIN_NAME, model.getEmployeeNo().trim().toUpperCase()));
-            if (employeeEntity == null) {
-                return null;
+            final String employeeNo = model.getEmployeeNo().trim().toUpperCase();
+            if (!adminNo.equals(employeeNo)) {
+                adminEmployee.setIfOwner(false);
+                final EmployeeEntity employeeEntity = employeeService.getOne(Wrappers.<EmployeeEntity>query().
+                        eq(EmployeeEntity.COL_LOGIN_NAME, model.getEmployeeNo().trim().toUpperCase()));
+                if (employeeEntity == null) {
+                    return null;
+                }
+                WarehouseRequest.Employee employee =
+                        buildWarehouseEmployee(employeeEntity, false);
+                employee.setIfOwner(true);
+                employees.add(employee);
             }
-            employees.add(buildWarehouseEmployee(employeeEntity, false));
         }
+        employees.add(adminEmployee);
         request.setEmployees(employees);
         return request;
     }

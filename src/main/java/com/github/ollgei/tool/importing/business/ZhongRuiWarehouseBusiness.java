@@ -10,4 +10,5 @@ public interface ZhongRuiWarehouseBusiness {
     void updateId(String token);
     void save(String code, List<WarehouseModel> models);
     void updateFail();
+    void remove(String token);
 }

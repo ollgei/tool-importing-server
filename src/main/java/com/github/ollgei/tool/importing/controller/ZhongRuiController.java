@@ -70,6 +70,12 @@ public class ZhongRuiController {
         return ApiHelper.builder().build().success();
     }
 
+    @GetMapping("/remove/warehouse")
+    public BearResponse removeWarehouse(@RequestParam("token") String token) {
+        zhongRuiBusiness.remove(token);
+        return ApiHelper.builder().build().success();
+    }
+
     @GetMapping("/fetch/province")
     public BearResponse fetchProvince(@RequestHeader("token") String token) {
         zhongRuiBusiness.fetchProvince(token);

@@ -57,6 +57,10 @@ public class ZhongRuiBusiness {
         warehouseBusiness.updateFail();
     }
 
+    public void remove(String token) {
+        warehouseBusiness.remove(token);
+    }
+
     public void createStorespace(String token) {
         warehouseBusiness.createStorespace(token);
     }

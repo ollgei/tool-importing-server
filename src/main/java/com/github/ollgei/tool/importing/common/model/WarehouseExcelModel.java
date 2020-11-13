@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 public class WarehouseExcelModel {
 
-    private String xuhao;
+//    private String xuhao;
 
     private String name;
 
@@ -19,6 +19,8 @@ public class WarehouseExcelModel {
     private String cityName;
 
     private String addr;
+
+    private String name2;
 
     private String adminName;
 
