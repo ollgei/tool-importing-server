@@ -64,7 +64,7 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
         final List<StorehouseEntity> list = storehouseService.list(
                 Wrappers.<StorehouseEntity>query().
                         eq(StorehouseEntity.COL_CREATED, "2")
-//                        .eq(StorehouseEntity.COL_CODE, "361000020001")
+                        .ne(StorehouseEntity.COL_CODE, "361000020001")
                 );
         int i = 0;
         final List<StorehouseEntity> fails = new ArrayList<>();
@@ -86,7 +86,7 @@ public class ZhongRuiWarehouseBusinessImpl implements ZhongRuiWarehouseBusiness,
             i++;
         }
         log.info("成功导入:{}条", i);
-        log.info("失败的数据", fails);
+        log.info("{}条失败的数据{},", fails.size(), fails);
     }
 
     @Override
